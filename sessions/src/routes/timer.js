@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Timer(){
     //grab dom elements
@@ -6,89 +6,131 @@ function Timer(){
     let pause = document.getElementById('pauseTime');
     let resume = document.getElementById('resumeTime');
 
+    const [seconds, setSeconds] = useState(0);
+    const [minutes, setMinutes] = useState(45);
+    const [active, setActive] = useState(false);
 
-    const seconds = 59;
-    let counterMinutes = 2; //eventually this will prompt the user for a value and subtract the result by one
-    let counterSeconds = 0;
-    let timer;
-
-    //the async needs to happen in the second function, not the minutes
-
-    async function counter(){
-        return new Promise((resolve)=>{
+    useEffect(()=>{
+        if (active){
             let display = document.getElementById('display');
             let currentDisplayTime = document.getElementById('displayTime')
             let p = document.createElement('p');
             currentDisplayTime.remove();
-            console.log(`${counterMinutes}:${counterSeconds}`);
-            if (counterMinutes < 10){
-                if (counterSeconds < 10){
-                    p.innerHTML = `0${counterMinutes}:0${counterSeconds}`;
+            if (minutes < 10){
+                if (seconds < 10){
+                    p.innerHTML = `0${minutes}:0${seconds}`;
                 }else{
-                    p.innerHTML =`0${counterMinutes}:${counterSeconds}`;
+                    p.innerHTML =`0${minutes}:${seconds}`;
                 }
             }else{
-                if (counterSeconds < 10){
-                    p.innerHTML = `${counterMinutes}:0${counterSeconds}`;
+                if (seconds < 10){
+                    p.innerHTML = `${minutes}:0${seconds}`;
                 }else{
-                    p.innerHTML= `${counterMinutes}:${counterSeconds}`;
+                    p.innerHTML= `${minutes}:${seconds}`;
                 }
             }
             p.id = 'displayTime';
             display.append(p);
-            resolve("seconds function called");
+
+            if (seconds !== 0 && minutes !== 0){
+                counterFunc();
+            } else if(seconds === 0 && minutes !==0){
+                setMinutes(minutes-1);
+                setSeconds(59);
+                counterFunc();
+            } else if(seconds === 0 && minutes === 0){
+                console.log("Loop is finished, countdown complete");
+            }
+        }
+
+    }, [seconds, active])
+
+    useEffect(() => {
+        if (!active){
+            setSeconds(59);
+            let display = document.getElementById('display');
+            let currentDisplayTime = document.getElementById('displayTime')
+            currentDisplayTime.remove();
+            let p = document.createElement('p');
+            if (minutes < 10){
+                if (seconds < 10){
+                    p.innerHTML = `0${minutes}:0${seconds}`;
+                }else{
+                    p.innerHTML =`0${minutes}:${seconds}`;
+                }
+            }else{
+                if (seconds < 10){
+                    p.innerHTML = `${minutes}:0${seconds}`;
+                }else{
+                    p.innerHTML= `${minutes}:${seconds}`;
+                }
+            }
+            p.id = 'displayTime';
+            display.append(p);
+        }
+    }, [minutes, active])
+
+
+    function counterFunc () {
+       const second = setTimeout(() =>{
+           if(seconds!== 0){
+               setSeconds(seconds-1);
+           }
         }, 1000);
     }
 
-    async function secondsFunc(){
-
-        let counterSecs = counterSeconds; //unfortunate reliance on a global variable
-        for (let x = 0; x <= counterSecs; x++){
-            const result = await counter();
-            counterSeconds--;
-        }
-        counterSeconds = seconds; // global variable reset
-
-    }
-
-    function counterFunc () {
-        let counterMins = counterMinutes;
-        for(let x = counterMins; x > 0; x--){
-            secondsFunc();
-            counterMinutes--;
-        }
-    }
-
-    //two counters - one for minutes, one for seconds
-    //two loops - one for the 60 seconds, one for the minutes. when min and seconds = 0 -- countdown complete
-
 
     let timerButtonClick = () =>{
-        counterFunc();
+
+        let start = document.getElementById('start');
+        if(start.innerHTML === "START"){
+            start.innerHTML = "PAUSE";
+            setActive(true);
+            setMinutes(minutes-1);
+            counterFunc();
+        } else if (start.innerHTML === "PAUSE"){
+            start.innerHTML = "RESUME";
+            setActive(false);
+        } else if (start.innerHTML === "RESUME"){
+            start.innerHTML = "PAUSE";
+            setActive(true);
+        }
     }
 
-    let pauseClick = () =>{
-        console.log('pause clicked');
-        clearInterval(timer);
+    let setTimer = (min) => {
+        setActive(false);
+        setSeconds(0);
+        setMinutes(min);
+        let start = document.getElementById('start');
+        start.innerHTML = "START";
     }
 
-    let resumeClick = () =>{
-        console.log('resume clicked');
-        counterFunc();
+    const min45 = () =>{
+        setTimer(45);
+    }
+    const min25 = () =>{
+       setTimer(25);
+    }
+    const min5 = () =>{
+        setTimer(5);
     }
 
 
     return (
         <div>
-            <button id="timerButton" onClick={timerButtonClick}>Start Count Down</button>
+            {/*oddly mad at the button for whatever reason */}
+            <button id="timerButton" onClick={min45}>45 minutes</button>
+            <button id="timerButton" onClick={min25}>25 minutes</button>
+            <button id="timerButton" onClick={min5}>5 minutes</button>
+
+            <br />
+
             <div id="display">
-                {/* test - this is an odd way to do comments but sure*/}
-                {/*load display with a function?*/}
-                <p id="displayTime">{counterMinutes+1}:00</p>
+                <p id="displayTime">{minutes}:00</p>
             </div>
-            <button id="pauseTime" onClick={pauseClick}>Pause</button>
-            <button id="resumeTime" onClick={resumeClick}>Resume</button>
-            <button id="reset">Reset</button>
+
+            <button id="start" onClick={timerButtonClick}>START</button>
+
         </div>
     )
 }

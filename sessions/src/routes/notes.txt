@@ -1,0 +1,26 @@
+app executes the function to roll down the second (useState)
+it waits, listening for that to complete <- useEffect, triggers on a useState change
+then it checks if the countdown is complete, if not it runs the call again
+loop until countdown is true
+
+  const test = setTimeout( () =>{
+                let display = document.getElementById('display');
+                let currentDisplayTime = document.getElementById('displayTime')
+                let p = document.createElement('p');
+                currentDisplayTime.remove();
+                console.log(`${counterMinutes}:${counterSeconds}`);
+                if (counterMinutes < 10){
+                    if (counterSeconds < 10){
+                        p.innerHTML = `0${counterMinutes}:0${counterSeconds}`;
+                    }else{
+                        p.innerHTML =`0${counterMinutes}:${counterSeconds}`;
+                    }
+                }else{
+                    if (counterSeconds < 10){
+                        p.innerHTML = `${counterMinutes}:0${counterSeconds}`;
+                    }else{
+                        p.innerHTML= `${counterMinutes}:${counterSeconds}`;
+                    }
+                }
+                p.id = 'displayTime';
+                display.append(p);
