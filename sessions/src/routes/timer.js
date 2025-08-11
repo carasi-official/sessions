@@ -10,6 +10,8 @@ function Timer(){
     const [minutes, setMinutes] = useState(45);
     const [active, setActive] = useState(false);
 
+    //needs to collect duration total for the purposes of submitting to the Session API
+
     useEffect(()=>{
         if (active){
             let display = document.getElementById('display');
